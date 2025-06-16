@@ -56,13 +56,6 @@ function addMem0Button() {
 
   const mem0ButtonContainer = document.createElement("div");
 
-  // // DEBUG STYLES - REMOVE/COMMENT OUT BEFORE COMMIT
-  // mem0ButtonContainer.style.border = "3px solid limegreen !important";
-  // mem0ButtonContainer.style.backgroundColor = "lightgoldenrodyellow !important";
-  // mem0ButtonContainer.style.zIndex = "99999 !important";
-  // mem0ButtonContainer.style.padding = "2px";
-  // console.log("Mem0: Applied temporary debug styles to mem0ButtonContainer (refined).");
-
   mem0ButtonContainer.style.position = "relative"; // For tooltip
   mem0ButtonContainer.style.display = "flex";
   mem0ButtonContainer.style.alignItems = "center";
@@ -131,9 +124,9 @@ function addMem0Button() {
 
     // New insertion logic: Insert before the textarea within its parent container.
     promptAreaContainer.insertBefore(mem0ButtonContainer, textArea);
-    // console.log("Mem0: Mem0 button container supposedly inserted before textarea."); // Removed
-    // const verifyInserted = document.querySelector("#mem0-button"); // Removed
-    // console.log("Mem0: Verified #mem0-button in DOM after insert (after inserting before textarea):", verifyInserted); // Removed
+    // console.log("Mem0: Mem0 button container supposedly inserted before textarea.");
+    // const verifyInserted = document.querySelector("#mem0-button");
+    // console.log("Mem0: Verified #mem0-button in DOM after insert (after inserting before textarea):", verifyInserted);
 
     function updateButtonStates() {
       const currentInputElement = document.querySelector("textarea#prompt-textarea");
@@ -721,9 +714,8 @@ function sendMemoryToMem0(memory) {
 
 function observeDOMChanges() {
   if (observer) observer.disconnect();
-  // console.log("Mem0: Setting up MutationObserver with debounced handler."); // Can be removed
   const debouncedHandler = debounce(function() {
-    // console.log("Mem0: Debounced DOM change handler executing."); // Keep if infrequent and useful
+    // console.log("Mem0: Debounced DOM change handler executing."); // Retaining this one as it's infrequent and useful for diagnosing observer issues.
     addMem0Button();
     addSyncButton();
     addEnterKeyInterception();
@@ -734,15 +726,12 @@ function observeDOMChanges() {
 }
 
 function initializeMem0Integration() {
-  // console.log("Mem0: initializeMem0Integration() called."); // Can be removed
   addMem0Button();
   addSyncButton();
   addEnterKeyInterception();
-  // console.log("Mem0: Initial calls to addMem0Button, etc. completed."); // Can be removed
 
-  document.addEventListener("keydown", async function (event) { // Added async here
+  document.addEventListener("keydown", async function (event) {
     if ((event.ctrlKey || event.metaKey) && (event.key === "m" || event.key === "M")) {
-      // console.log("Mem0: Ctrl+M Key event triggered. document.activeElement:", document.activeElement); // Can be removed
       event.preventDefault();
       event.stopPropagation();
       const inputElement = document.getElementById("prompt-textarea");
@@ -767,7 +756,6 @@ function addEnterKeyInterception() {
 
         const handleEnterKey = async function (event) {
             if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
-              // console.log("Mem0: Enter Key event triggered. document.activeElement:", document.activeElement); // Can be removed
               event.preventDefault();
               event.stopPropagation();
 
