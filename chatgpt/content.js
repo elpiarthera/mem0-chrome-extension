@@ -38,18 +38,37 @@ function createPopup(container) {
 
 function addMem0Button() {
   const textArea = document.querySelector("textarea#prompt-textarea");
-  if (!textArea) return;
+  if (!textArea) {
+    // console.log("Mem0: textArea not found, exiting addMem0Button."); // Keep this one if desired
+    return;
+  }
 
-  const sendButton = textArea.parentElement.querySelector('button[data-testid="send-button"]');
+  if (document.querySelector("#mem0-button")) {
+    // console.log("Mem0: #mem0-button already exists."); // Optional: keep for rare cases
+    return;
+  }
 
-  if (sendButton && !document.querySelector("#mem0-button")) {
-    const mem0ButtonContainer = document.createElement("div");
-    mem0ButtonContainer.style.position = "relative";
-    mem0ButtonContainer.style.display = "flex";
-    mem0ButtonContainer.style.alignItems = "center";
-    mem0ButtonContainer.style.marginRight = "8px";
+  const promptAreaContainer = textArea.parentElement;
+  if (!promptAreaContainer) {
+    // console.log("Mem0: promptAreaContainer (textArea.parentElement) not found.");  // Optional: keep
+    return;
+  }
 
-    const mem0Button = document.createElement("button");
+  const mem0ButtonContainer = document.createElement("div");
+
+  // // DEBUG STYLES - REMOVE/COMMENT OUT BEFORE COMMIT
+  // mem0ButtonContainer.style.border = "3px solid limegreen !important";
+  // mem0ButtonContainer.style.backgroundColor = "lightgoldenrodyellow !important";
+  // mem0ButtonContainer.style.zIndex = "99999 !important";
+  // mem0ButtonContainer.style.padding = "2px";
+  // console.log("Mem0: Applied temporary debug styles to mem0ButtonContainer (refined).");
+
+  mem0ButtonContainer.style.position = "relative"; // For tooltip
+  mem0ButtonContainer.style.display = "flex";
+  mem0ButtonContainer.style.alignItems = "center";
+  mem0ButtonContainer.style.marginRight = "8px"; // Spacing if inserted before textarea
+
+  const mem0Button = document.createElement("button");
     mem0Button.id = "mem0-button";
     mem0Button.type = "button";
     mem0Button.style.background = "none";
@@ -110,10 +129,11 @@ function addMem0Button() {
     mem0ButtonContainer.appendChild(mem0Button);
     mem0ButtonContainer.appendChild(tooltip);
 
-    const sendButtonWrapper = sendButton.parentNode;
-    if (sendButtonWrapper) {
-      sendButtonWrapper.insertBefore(mem0ButtonContainer, sendButton);
-    }
+    // New insertion logic: Insert before the textarea within its parent container.
+    promptAreaContainer.insertBefore(mem0ButtonContainer, textArea);
+    // console.log("Mem0: Mem0 button container supposedly inserted before textarea."); // Removed
+    // const verifyInserted = document.querySelector("#mem0-button"); // Removed
+    // console.log("Mem0: Verified #mem0-button in DOM after insert (after inserting before textarea):", verifyInserted); // Removed
 
     function updateButtonStates() {
       const currentInputElement = document.querySelector("textarea#prompt-textarea");
@@ -701,8 +721,9 @@ function sendMemoryToMem0(memory) {
 
 function observeDOMChanges() {
   if (observer) observer.disconnect();
-
+  // console.log("Mem0: Setting up MutationObserver with debounced handler."); // Can be removed
   const debouncedHandler = debounce(function() {
+    // console.log("Mem0: Debounced DOM change handler executing."); // Keep if infrequent and useful
     addMem0Button();
     addSyncButton();
     addEnterKeyInterception();
@@ -713,30 +734,31 @@ function observeDOMChanges() {
 }
 
 function initializeMem0Integration() {
+  // console.log("Mem0: initializeMem0Integration() called."); // Can be removed
   addMem0Button();
   addSyncButton();
   addEnterKeyInterception();
+  // console.log("Mem0: Initial calls to addMem0Button, etc. completed."); // Can be removed
 
   document.addEventListener("keydown", async function (event) { // Added async here
     if ((event.ctrlKey || event.metaKey) && (event.key === "m" || event.key === "M")) {
+      // console.log("Mem0: Ctrl+M Key event triggered. document.activeElement:", document.activeElement); // Can be removed
       event.preventDefault();
       event.stopPropagation();
-      const inputElement = document.getElementById("prompt-textarea"); // Use getElementById for speed
+      const inputElement = document.getElementById("prompt-textarea");
 
       if (document.activeElement === inputElement && inputElement && inputElement.value.trim() !== "") {
-         await handleMem0Click(false); // false = don't click send button, allow review
+         await handleMem0Click(false);
       } else if (!inputElement || inputElement.value.trim() === "") {
          showToastNotification("Input is empty. Type a message to use Mem0 with Ctrl+M.", "info");
       }
-      // If input has content but is not focused, consider if we should still trigger.
-      // Current logic: only triggers if focused and has content.
     }
   });
   observeDOMChanges();
 }
 
 function addEnterKeyInterception() {
-  const inputElement = document.getElementById("prompt-textarea"); // Use getElementById
+  const inputElement = document.getElementById("prompt-textarea");
 
   if (inputElement && !inputElement.dataset.enterKeyIntercepted) {
     chrome.storage.sync.get({ enterKeyInterceptionEnabled: true }, function (data) {
@@ -745,10 +767,11 @@ function addEnterKeyInterception() {
 
         const handleEnterKey = async function (event) {
             if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
-              event.preventDefault(); // Always prevent default if we are handling it.
+              // console.log("Mem0: Enter Key event triggered. document.activeElement:", document.activeElement); // Can be removed
+              event.preventDefault();
               event.stopPropagation();
 
-              const memoryEnabled = await getMemoryEnabledState(); // Global toggle
+              const memoryEnabled = await getMemoryEnabledState();
               const currentInputValue = inputElement.value;
 
               if (memoryEnabled && currentInputValue.trim() !== "") {
