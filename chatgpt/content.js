@@ -39,18 +39,18 @@ function createPopup(container) {
 function addMem0Button() {
   const textArea = document.querySelector("textarea#prompt-textarea");
   if (!textArea) {
-    // console.log("Mem0: textArea not found, exiting addMem0Button."); // Keep this one if desired
+    // console.log("Mem0: textArea not found, exiting addMem0Button.");
     return;
   }
 
   if (document.querySelector("#mem0-button")) {
-    // console.log("Mem0: #mem0-button already exists."); // Optional: keep for rare cases
+    // console.log("Mem0: #mem0-button already exists.");
     return;
   }
 
   const promptAreaContainer = textArea.parentElement;
   if (!promptAreaContainer) {
-    // console.log("Mem0: promptAreaContainer (textArea.parentElement) not found.");  // Optional: keep
+    // console.log("Mem0: promptAreaContainer (textArea.parentElement) not found.");
     return;
   }
 
@@ -84,9 +84,7 @@ function addMem0Button() {
     icon.style.transition = "filter 0.3s ease";
     mem0Button.appendChild(icon);
 
-    // const popup = createPopup(mem0ButtonContainer); // Kept if needed for specific messages for this button
-
-    mem0Button.addEventListener("click", () => handleMem0Click(false)); // Don't auto-send on button click
+    mem0Button.addEventListener("click", () => handleMem0Click(false));
 
     mem0Button.addEventListener("mouseenter", () => {
       if (!mem0Button.disabled) {
@@ -122,11 +120,7 @@ function addMem0Button() {
     mem0ButtonContainer.appendChild(mem0Button);
     mem0ButtonContainer.appendChild(tooltip);
 
-    // New insertion logic: Insert before the textarea within its parent container.
     promptAreaContainer.insertBefore(mem0ButtonContainer, textArea);
-    // console.log("Mem0: Mem0 button container supposedly inserted before textarea.");
-    // const verifyInserted = document.querySelector("#mem0-button");
-    // console.log("Mem0: Verified #mem0-button in DOM after insert (after inserting before textarea):", verifyInserted);
 
     function updateButtonStates() {
       const currentInputElement = document.querySelector("textarea#prompt-textarea");
@@ -144,10 +138,9 @@ function addMem0Button() {
   }
 }
 
-// New function for toast-like notifications
+// Restored original showToastNotification function
 function showToastNotification(message, type = "info") {
   const toastId = "mem0-toast-notification";
-  // Remove existing toast if any
   const existingToast = document.getElementById(toastId);
   if (existingToast) {
     existingToast.remove();
@@ -172,7 +165,6 @@ function showToastNotification(message, type = "info") {
   toast.style.opacity = "0";
   toast.style.transition = "opacity 0.3s ease-in-out";
 
-
   if (type === "error") {
     toast.style.backgroundColor = "#E53935"; // Material Design Red
   } else if (type === "success") {
@@ -183,16 +175,14 @@ function showToastNotification(message, type = "info") {
 
   document.body.appendChild(toast);
 
-  // Trigger fade in
   setTimeout(() => {
     toast.style.opacity = "1";
   }, 50);
 
-
   setTimeout(() => {
     toast.style.opacity = "0";
     setTimeout(() => {
-      if (toast.parentElement) { // Check if still in DOM
+      if (toast.parentElement) {
         toast.remove();
       }
     }, 300);
@@ -229,7 +219,7 @@ async function handleMem0Click(clickSendButton = false) {
   message = message.replace(memInfoRegex, "").trim();
 
   if (isProcessingMem0) {
-    setButtonLoadingState(false); // Prevent button getting stuck in loading
+    setButtonLoadingState(false);
     return;
   }
 
@@ -328,7 +318,7 @@ async function handleMem0Click(clickSendButton = false) {
     }).catch((error) => console.error("Error adding memory:", error));
 
   } catch (error) {
-    const currentMessage = getInputValue(); // Get current message at time of error
+    const currentMessage = getInputValue();
     console.error(
       "Error in handleMem0Click processing input (length " +
       (currentMessage ? currentMessage.length : 0) +
@@ -338,7 +328,7 @@ async function handleMem0Click(clickSendButton = false) {
     showToastNotification("Mem0: An unexpected error occurred.", "error");
   } finally {
     isProcessingMem0 = false;
-    setButtonLoadingState(false); // Ensure loading state is always reset
+    setButtonLoadingState(false);
   }
 }
 
@@ -440,7 +430,6 @@ function addSyncButton() {
   if (buttonContainer) {
     let syncButton = document.querySelector("#sync-button");
 
-    // If the syncButton does not exist, create it
     if (!syncButton) {
       syncButton = document.createElement("button");
       syncButton.id = "sync-button";
@@ -458,7 +447,6 @@ function addSyncButton() {
       syncIcon.style.marginRight = "8px";
 
       syncButton.prepend(syncIcon);
-
       syncButton.addEventListener("click", handleSyncClick);
 
       syncButton.addEventListener("mouseenter", () => {
@@ -477,11 +465,8 @@ function addSyncButton() {
       buttonContainer.insertBefore(syncButton, buttonContainer.firstChild);
     }
 
-    // Optionally, handle the disabled state
     function updateSyncButtonState() {
-      // Define when the sync button should be enabled or disabled
-      syncButton.disabled = false; // For example, always enabled
-      // Update opacity or pointer events if needed
+      syncButton.disabled = false;
       if (syncButton.disabled) {
         syncButton.style.opacity = "0.5";
         syncButton.style.pointerEvents = "none";
@@ -490,10 +475,8 @@ function addSyncButton() {
         syncButton.style.pointerEvents = "auto";
       }
     }
-
     updateSyncButtonState();
   } else {
-    // If resetMemoriesButton or specificTable is not found, remove syncButton from DOM
     const existingSyncButton = document.querySelector("#sync-button");
     if (existingSyncButton && existingSyncButton.parentNode) {
       existingSyncButton.parentNode.removeChild(existingSyncButton);
@@ -519,10 +502,7 @@ function handleSyncClick() {
     if (table && syncButton) {
       const rows = table.querySelectorAll("tbody tr");
       let memories = [];
-
-      // Change sync button state to loading
       setSyncButtonLoadingState(true);
-
       let syncedCount = 0;
       const totalCount = rows.length;
 
@@ -532,14 +512,11 @@ function handleSyncClick() {
           const content = cells[0]
             .querySelector("div.whitespace-pre-wrap")
             .textContent.trim();
-
           const memory = {
             role: "user",
             content: `Remember this about me: ${content}`,
           };
-
           memories.push(memory);
-
           sendMemoryToMem0(memory)
             .then(() => {
               syncedCount++;
@@ -560,23 +537,26 @@ function handleSyncClick() {
         }
       });
 
+      // This seems to be a duplicate call if individual sendMemoryToMem0 is used.
+      // If batching is preferred, the individual calls in the loop should be removed.
+      // For now, keeping as is, but noting potential redundancy or race condition.
       sendMemoriesToMem0(memories)
         .then(() => {
-          showSyncPopup(syncButton, `${memories.length} memories synced`);
-          setSyncButtonLoadingState(false);
+          // This might be reached before all individual sends complete if not careful.
+          // showSyncPopup(syncButton, `${memories.length} memories synced`);
+          // setSyncButtonLoadingState(false);
         })
         .catch((error) => {
-          console.error("Error syncing memories:", error);
-          showSyncPopup(syncButton, "Error syncing memories");
-          setSyncButtonLoadingState(false);
+          console.error("Error batch syncing memories:", error);
+          // showSyncPopup(syncButton, "Error batch syncing memories");
+          // setSyncButtonLoadingState(false);
         });
     } else {
-      console.error("Table or Sync button not found");
+      console.error("Table or Sync button not found for sync click.");
     }
   });
 }
 
-// New function to send memories in batch
 function sendMemoriesToMem0(memories) {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get(
@@ -593,7 +573,7 @@ function sendMemoriesToMem0(memories) {
               Authorization: authHeader,
             },
             body: JSON.stringify({
-              messages: memories,
+              messages: memories, // Assuming this is an array of message objects
               user_id: items.userId,
               infer: true,
               metadata: {
@@ -603,7 +583,7 @@ function sendMemoriesToMem0(memories) {
           })
             .then((response) => {
               if (!response.ok) {
-                reject(`Failed to add memories: ${response.status}`);
+                response.text().then(text => reject(`Failed to add memories: ${response.status} ${text}`)).catch(() => reject(`Failed to add memories: ${response.status}`));
               } else {
                 resolve();
               }
@@ -622,7 +602,7 @@ function sendMemoriesToMem0(memories) {
 function setSyncButtonLoadingState(isLoading) {
   const syncButton = document.querySelector("#sync-button");
   const syncButtonContent = document.querySelector("#sync-button-content");
-  if (syncButton) {
+  if (syncButton && syncButtonContent) { // Ensure content element also exists
     if (isLoading) {
       syncButton.disabled = true;
       syncButton.style.cursor = "wait";
@@ -641,8 +621,6 @@ function setSyncButtonLoadingState(isLoading) {
 
 function showSyncPopup(button, message) {
   const popup = document.createElement("div");
-
-  // Create and add the (i) icon
   const infoIcon = document.createElement("span");
   infoIcon.textContent = "ⓘ ";
   infoIcon.style.marginRight = "3px";
@@ -653,22 +631,27 @@ function showSyncPopup(button, message) {
   popup.style.cssText = `
         position: absolute;
         top: 50%;
-        left: -160px;
+        left: -160px; /* Adjusted for typical button sizes */
         transform: translateY(-50%);
         background-color: #171717;
         color: white;
-        padding: 6px 8px;
+        padding: 6px 10px; /* Adjusted padding */
         border-radius: 6px;
         font-size: 12px;
         white-space: nowrap;
         z-index: 1000;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* Added subtle shadow */
     `;
 
-  button.style.position = "relative";
-  button.appendChild(popup);
+  if (button && button.style) { // Ensure button is valid and has style property
+    button.style.position = "relative"; // Necessary for absolute positioning of popup
+    button.appendChild(popup);
+  }
 
   setTimeout(() => {
-    popup.remove();
+    if (popup.parentElement) { // Check if still in DOM
+        popup.remove();
+    }
   }, 3000);
 }
 
@@ -687,8 +670,8 @@ function sendMemoryToMem0(memory) {
               "Content-Type": "application/json",
               Authorization: authHeader,
             },
-            body: JSON.stringify({
-              messages: [{ content: memory.content, role: "user" }],
+            body: JSON.stringify({ // Ensure this structure matches API: expecting list of messages
+              messages: Array.isArray(memory) ? memory : [memory], // Handle if memory is single or array
               user_id: items.userId,
               infer: true,
               metadata: {
@@ -698,7 +681,7 @@ function sendMemoryToMem0(memory) {
           })
             .then((response) => {
               if (!response.ok) {
-                reject(`Failed to add memory: ${response.status}`);
+                response.text().then(text => reject(`Failed to add memory: ${response.status} ${text}`)).catch(() => reject(`Failed to add memory: ${response.status}`));
               } else {
                 resolve();
               }
@@ -715,7 +698,7 @@ function sendMemoryToMem0(memory) {
 function observeDOMChanges() {
   if (observer) observer.disconnect();
   const debouncedHandler = debounce(function() {
-    // console.log("Mem0: Debounced DOM change handler executing."); // Retaining this one as it's infrequent and useful for diagnosing observer issues.
+    // console.log("Mem0: Debounced DOM change handler executing.");
     addMem0Button();
     addSyncButton();
     addEnterKeyInterception();
@@ -763,37 +746,25 @@ function addEnterKeyInterception() {
               const currentInputValue = inputElement.value;
 
               if (memoryEnabled && currentInputValue.trim() !== "") {
-                  await handleMem0Click(true); // true to click send button after processing
+                  await handleMem0Click(true);
               } else {
-                  // Memory is disabled OR input is empty. We should send the message directly.
                   if (currentInputValue.trim() !== "") {
                       const sendButton = document.querySelector('button[data-testid="send-button"]');
                       if (sendButton) {
                           sendButton.click();
                       } else {
                           console.error("Send button not found for Enter key press.");
-                          // Fallback: try to submit the form if send button is not found
                           let form = inputElement.closest('form');
                           if (form) {
                               form.requestSubmit();
                           }
                       }
                   }
-                  // If input is truly empty (not just whitespace), ChatGPT itself won't send.
-                  // So, no action needed for an empty input here.
               }
             }
         };
-
-        inputElement.addEventListener("keydown", handleEnterKey, true ); // Use capture phase
+        inputElement.addEventListener("keydown", handleEnterKey, true );
       } else {
-        // If interception is disabled, ensure we remove our flag if it was previously set
-        // Note: Properly removing the specific event listener added above would require storing
-        // a reference to `handleEnterKey`. For now, the check `!inputElement.dataset.enterKeyIntercepted`
-        // and `data.enterKeyInterceptionEnabled` prevents re-adding if already added for this state.
-        // If the setting is toggled off, the listener might remain but won't execute its core logic
-        // beyond the initial checks if the setting is re-read inside the handler (which it isn't currently).
-        // This is a minor inefficiency but shouldn't break functionality.
         if (inputElement.dataset.enterKeyIntercepted) {
             delete inputElement.dataset.enterKeyIntercepted;
         }
@@ -804,13 +775,12 @@ function addEnterKeyInterception() {
 
 function getMemoryEnabledState() {
   return new Promise((resolve) => {
-    chrome.storage.sync.get({ memory_enabled: true }, function (result) { // Default true
+    chrome.storage.sync.get({ memory_enabled: true }, function (result) {
       resolve(result.memory_enabled);
     });
   });
 }
 
-// Initialize after DOM is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeMem0Integration);
 } else {
